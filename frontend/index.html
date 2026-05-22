@@ -11,20 +11,20 @@
     <!-- NAVIGATION -->
     <nav>
         <div class="logo">🛡️ SafeTravel</div>
-        <!-- Guest nav: shown on landing & auth -->
         <ul class="nav-links" id="authNav">
             <li><a href="#" onclick="goToPage('landing'); return false;">Home</a></li>
             <li><a href="#" onclick="goToPage('auth'); return false;">Login</a></li>
         </ul>
-        <!-- App nav: shown when logged in -->
         <ul class="nav-links" id="appNav" style="display:none;">
             <li><a href="#" data-page="dashboard" onclick="goToPage('dashboard'); return false;">Dashboard</a></li>
+            <li><a href="#" data-page="incidents" onclick="goToPage('incidents'); return false;">Incidents</a></li>
+            <li><a href="#" data-page="accidents" onclick="goToPage('accidents'); return false;">Accidents</a></li>
             <li><a href="#" data-page="sos" onclick="goToPage('sos'); return false;">SOS</a></li>
+            <li><a href="#" data-page="help" onclick="goToPage('help'); return false;">Help</a></li>
             <li><button onclick="logout()">Logout</button></li>
         </ul>
     </nav>
 
-    <!-- TOAST CONTAINER -->
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- LANDING PAGE -->
@@ -44,6 +44,19 @@
             <div class="auth-card">
                 <h2 id="authTitle">Login</h2>
                 <form id="authForm" onsubmit="handleAuth(event)">
+                    <!-- Extra fields for register only -->
+                    <div id="extraRegisterFields" class="hidden">
+                        <div class="form-group">
+                            <label for="fullName">Full Name</label>
+                            <input type="text" id="fullName" placeholder="Enter full name">
+                            <div class="error-message"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="mobile">Mobile (10 digits)</label>
+                            <input type="tel" id="mobile" placeholder="Enter mobile number">
+                            <div class="error-message"></div>
+                        </div>
+                    </div>
                     <div class="form-group">
                         <label for="username">Username</label>
                         <input type="text" id="username" placeholder="Enter username" required>
@@ -51,13 +64,29 @@
                     </div>
                     <div class="form-group">
                         <label for="password">Password</label>
-                        <input type="password" id="password" placeholder="Enter password" required>
+                        <input type="password" id="password" placeholder="Enter password" required oninput="if(isRegisterMode) checkPasswordStrength(this.value)">
                         <div class="error-message"></div>
+                        <div id="passwordStrengthWrap" style="margin-top:0.5rem;">
+                            <div style="height:4px;background:rgba(255,255,255,0.1);border-radius:4px;overflow:hidden;">
+                                <div id="passwordStrengthBar" style="height:100%;width:0%;transition:all 0.3s;border-radius:4px;"></div>
+                            </div>
+                            <span id="passwordStrengthLabel" style="font-size:0.78rem;"></span>
+                        </div>
                     </div>
                     <div id="confirmPasswordGroup" class="form-group hidden">
                         <label for="confirmPassword">Confirm Password</label>
                         <input type="password" id="confirmPassword" placeholder="Confirm password">
                         <div class="error-message"></div>
+                    </div>
+                    <div id="extraRegisterFields2" class="hidden">
+                        <div class="form-group">
+                            <label for="role">Role</label>
+                            <select id="role" class="form-select">
+                                <option value="Tourist">Tourist</option>
+                                <option value="Admin">Admin</option>
+                                <option value="Data Provider">Data Provider</option>
+                            </select>
+                        </div>
                     </div>
                     <button id="authBtn" type="submit" class="auth-button">Login</button>
                 </form>
@@ -76,23 +105,19 @@
                 <h1>Welcome, <span id="usernameDisplay"></span>! 👋</h1>
                 <p>Real-time safety monitoring and threat assessment</p>
             </div>
-
             <div class="dashboard-grid">
-                <!-- Location Card -->
                 <div class="dashboard-card">
                     <h3><span class="card-icon">📍</span> Your Location</h3>
                     <div class="location-display">
-                        <p style="margin-bottom: 1rem; color: var(--text-secondary);">Fetching location...</p>
+                        <p style="margin-bottom:1rem;color:var(--text-secondary);">Fetching location...</p>
                         <div class="loading-spinner"></div>
                     </div>
-                    <div id="locationInfo" style="display: none; color: var(--text-secondary);">
-                        <p>📌 Latitude: <span id="latitude" style="color: var(--primary-teal);">-</span></p>
-                        <p>📌 Longitude: <span id="longitude" style="color: var(--primary-teal);">-</span></p>
-                        <p>🎯 Accuracy: <span id="accuracy" style="color: var(--primary-teal);">-</span>m</p>
+                    <div id="locationInfo" style="display:none;color:var(--text-secondary);">
+                        <p>📌 Latitude: <span id="latitude" style="color:var(--primary-teal);">-</span></p>
+                        <p>📌 Longitude: <span id="longitude" style="color:var(--primary-teal);">-</span></p>
+                        <p>🎯 Accuracy: <span id="accuracy" style="color:var(--primary-teal);">-</span>m</p>
                     </div>
                 </div>
-
-                <!-- Safety Status Card -->
                 <div class="dashboard-card">
                     <h3><span class="card-icon">🛡️</span> Safety Status</h3>
                     <div class="status-badge">
@@ -107,22 +132,17 @@
                             <span>AI Risk Detection:</span>
                             <span class="risk-value low" id="riskScore">Low</span>
                         </div>
-                        <div class="risk-bar">
-                            <div class="risk-fill" id="riskFill"></div>
-                        </div>
+                        <div class="risk-bar"><div class="risk-fill" id="riskFill"></div></div>
                     </div>
                 </div>
-
-                <!-- Quick Actions Card -->
                 <div class="dashboard-card">
                     <h3><span class="card-icon">⚡</span> Quick Actions</h3>
                     <div class="action-buttons">
                         <button class="action-btn btn-primary" onclick="goToPage('sos'); return false;">🚨 Emergency SOS</button>
+                        <button class="action-btn btn-secondary" onclick="goToPage('incidents'); return false;">⚠️ Report Incident</button>
                         <button class="action-btn btn-secondary" onclick="refreshDashboard()">🔄 Refresh Status</button>
                     </div>
                 </div>
-
-                <!-- Blockchain Identity Card -->
                 <div class="dashboard-card">
                     <h3><span class="card-icon">🔗</span> Blockchain Identity</h3>
                     <div style="position:relative;z-index:1;">
@@ -134,8 +154,6 @@
                     </div>
                 </div>
             </div>
-
-            <!-- GEOFENCING SECTION -->
             <div class="geofence-section">
                 <h2>🗺️ Geofence Monitoring</h2>
                 <div class="geofence-map" id="geofenceMap">
@@ -145,50 +163,220 @@
                 <div class="geofence-warning" id="geofenceWarning">
                     <p>⚠️ Warning: You are near a danger zone! Stay alert and proceed with caution.</p>
                 </div>
-                <p style="margin-top: 1.5rem; color: var(--text-tertiary); text-align: center; font-size: 0.9rem;">
-                    🟢 Green pulse = Your current location &nbsp;|&nbsp; 🔴 Red zone = Simulated danger area &nbsp;|&nbsp; 📏 <span id="geofenceDistance">Calculating...</span>
+                <p style="margin-top:1.5rem;color:var(--text-tertiary);text-align:center;font-size:0.9rem;">
+                    🟢 Your location &nbsp;|&nbsp; 🔴 Danger zone &nbsp;|&nbsp; 📏 <span id="geofenceDistance">Calculating...</span>
                 </p>
             </div>
-
-            <!-- ACTIVITY LOG SECTION -->
-            <div class="geofence-section" style="margin-top: 2rem;">
+            <div class="geofence-section" style="margin-top:2rem;">
                 <h2>📋 Tourist Activity Log</h2>
                 <div id="activityList" class="activity-list">
                     <p style="color:var(--text-tertiary);text-align:center;padding:2rem;">Loading activity...</p>
                 </div>
             </div>
+        </div>
+    </div>
 
+    <!-- INCIDENTS PAGE -->
+    <div id="incidents" class="page">
+        <div class="container">
+            <div class="dashboard-header">
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+                    <div>
+                        <h1 style="font-size:2rem;">⚠️ Incidents</h1>
+                        <p>View and report safety incidents in your area</p>
+                    </div>
+                    <button class="action-btn btn-primary" onclick="openIncidentModal()" style="width:auto;padding:0.8rem 1.5rem;">+ Add Incident</button>
+                </div>
+            </div>
+            <div id="incidentList" class="report-list"></div>
+        </div>
+
+        <!-- Add Incident Modal -->
+        <div class="modal-overlay" id="incidentModal">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h3>Add Incident</h3>
+                    <button class="modal-close" onclick="closeIncidentModal()">✕</button>
+                </div>
+                <form id="incidentForm" onsubmit="submitIncident(event)">
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" id="incidentTitle" placeholder="Incident title" required>
+                        <div class="error-message"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="incidentDescription" placeholder="Describe the incident..." rows="3" class="form-textarea" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Severity</label>
+                        <select id="incidentSeverity" class="form-select">
+                            <option value="Low">Low</option>
+                            <option value="Medium" selected>Medium</option>
+                            <option value="High">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Date & Time</label>
+                        <input type="datetime-local" id="incidentDatetime" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" id="incidentLocation" placeholder="Location name">
+                        <div class="error-message"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Image URL (optional)</label>
+                        <input type="text" id="incidentImageUrl" placeholder="https://...">
+                        <div class="error-message"></div>
+                    </div>
+                    <div id="incidentAIResult" style="margin-bottom:1rem;padding:0.8rem;background:rgba(124,58,237,0.1);border-radius:0.5rem;font-size:0.85rem;color:var(--accent-purple);display:none;"></div>
+                    <button type="button" class="action-btn btn-secondary" onclick="analyzeIncidentWithAI()" style="margin-bottom:0.8rem;">🤖 Analyze with AI</button>
+                    <button type="submit" id="submitIncidentBtn" class="action-btn btn-primary">Submit & Log to Blockchain</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ACCIDENTS PAGE -->
+    <div id="accidents" class="page">
+        <div class="container">
+            <div class="dashboard-header">
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+                    <div>
+                        <h1 style="font-size:2rem;">🚗 Accidents</h1>
+                        <p>View and report accidents in your area</p>
+                    </div>
+                    <button class="action-btn btn-primary" onclick="openAccidentModal()" style="width:auto;padding:0.8rem 1.5rem;">+ Report Accident</button>
+                </div>
+            </div>
+            <div id="accidentList" class="report-list"></div>
+        </div>
+
+        <!-- Report Accident Modal -->
+        <div class="modal-overlay" id="accidentModal">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h3>+ Report Accident</h3>
+                    <button class="modal-close" onclick="closeAccidentModal()">✕</button>
+                </div>
+                <form id="accidentForm" onsubmit="submitAccident(event)">
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" id="accidentTitle" placeholder="Accident title" required>
+                        <div class="error-message"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="accidentDescription" placeholder="Describe the accident..." rows="3" class="form-textarea" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>People Involved</label>
+                        <input type="number" id="accidentPeople" value="1" min="1" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Injuries Reported</label>
+                        <div style="display:flex;gap:0.8rem;margin-top:0.5rem;">
+                            <button type="button" id="injuryYes" class="injury-btn" onclick="setInjury(true)">Yes</button>
+                            <button type="button" id="injuryNo" class="injury-btn btn-active" onclick="setInjury(false)">No</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Date & Time</label>
+                        <input type="datetime-local" id="accidentDatetime" class="form-input">
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" id="accidentLocation" placeholder="Location name">
+                        <div class="error-message"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Image URL (optional)</label>
+                        <input type="text" id="accidentImageUrl" placeholder="https://...">
+                        <div class="error-message"></div>
+                    </div>
+                    <button type="submit" id="submitAccidentBtn" class="action-btn btn-primary">Submit & Log to Blockchain</button>
+                </form>
+            </div>
         </div>
     </div>
 
     <!-- SOS PAGE -->
     <div id="sos" class="page">
         <div class="sos-container">
-            <div class="sos-header">
-                <h1>🚨 Emergency Response System</h1>
-            </div>
-
+            <div class="sos-header"><h1>🚨 Emergency Response System</h1></div>
             <button class="sos-button" id="sosButton" onclick="activateSOS()">SOS</button>
             <div class="sos-message">Press the button in case of emergency</div>
-
             <div class="sos-alert" id="sosAlert">
                 <h3>🚨 Emergency Alert Sent!</h3>
                 <p>Your location has been transmitted to emergency services.</p>
-                <p style="font-size: 0.9rem; margin-top: 1rem;">Emergency personnel will reach you shortly. Stay calm and safe.</p>
+                <p style="font-size:0.9rem;margin-top:1rem;">Emergency personnel will reach you shortly. Stay calm and safe.</p>
+            </div>
+            <div class="emergency-contacts">
+                <div class="contact-card"><div class="contact-label">Police Emergency</div><div class="contact-number">100</div></div>
+                <div class="contact-card"><div class="contact-label">Women Helpline</div><div class="contact-number">1091</div></div>
+                <div class="contact-card"><div class="contact-label">Medical Emergency</div><div class="contact-number">108</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HELP & PROFILE PAGE -->
+    <div id="help" class="page">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1 style="font-size:2rem;">❓ Help & Profile</h1>
+                <p>Your profile, emergency contacts and support</p>
+            </div>
+            <div class="dashboard-grid">
+                <!-- Profile Card -->
+                <div class="dashboard-card">
+                    <h3><span class="card-icon">👤</span> My Profile</h3>
+                    <div style="position:relative;z-index:1;display:flex;flex-direction:column;gap:0.7rem;">
+                        <div class="profile-row"><span class="profile-label">Username</span><span id="profileUsername" class="profile-value">-</span></div>
+                        <div class="profile-row"><span class="profile-label">Full Name</span><span id="profileFullName" class="profile-value">-</span></div>
+                        <div class="profile-row"><span class="profile-label">Mobile</span><span id="profileMobile" class="profile-value">-</span></div>
+                        <div class="profile-row"><span class="profile-label">Role</span><span id="profileRole" class="profile-value">-</span></div>
+                        <div class="profile-row"><span class="profile-label">SOS Alerts</span><span id="profileSosCount" class="profile-value">0</span></div>
+                        <div class="profile-row"><span class="profile-label">Joined</span><span id="profileJoined" class="profile-value">-</span></div>
+                    </div>
+                </div>
+                <!-- Blockchain ID Card -->
+                <div class="dashboard-card">
+                    <h3><span class="card-icon">🔗</span> Blockchain Digital ID</h3>
+                    <div style="position:relative;z-index:1;">
+                        <p style="color:var(--text-tertiary);font-size:0.82rem;margin-bottom:0.8rem;">Your tamper-proof identity on the blockchain</p>
+                        <div class="blockchain-id-box">
+                            <span id="profileBlockchainId" style="word-break:break-all;font-size:0.75rem;font-family:monospace;color:var(--accent-teal);">Loading...</span>
+                        </div>
+                        <p style="color:var(--text-tertiary);font-size:0.75rem;margin-top:0.8rem;">🔒 Secured via SHA-256 hash chain — tamper-proof</p>
+                    </div>
+                </div>
             </div>
 
-            <div class="emergency-contacts">
-                <div class="contact-card">
-                    <div class="contact-label">Police Emergency</div>
-                    <div class="contact-number">100</div>
+            <!-- Emergency Contacts -->
+            <div class="geofence-section" style="margin-top:2rem;">
+                <h2 style="color:var(--danger-red);">🆘 Emergency Contacts</h2>
+                <div class="emergency-contacts" style="margin-top:1.5rem;max-width:100%;">
+                    <div class="contact-card"><div class="contact-label">Tourist Police</div><div class="contact-number" style="color:var(--danger-red);">1363</div></div>
+                    <div class="contact-card"><div class="contact-label">Ambulance</div><div class="contact-number" style="color:var(--danger-red);">108</div></div>
+                    <div class="contact-card"><div class="contact-label">Fire</div><div class="contact-number" style="color:var(--warning-orange);">101</div></div>
+                    <div class="contact-card"><div class="contact-label">Women Helpline</div><div class="contact-number" style="color:var(--primary-teal);">1091</div></div>
+                    <div class="contact-card"><div class="contact-label">Disaster Mgmt</div><div class="contact-number" style="color:var(--primary-purple);">1078</div></div>
+                    <div class="contact-card"><div class="contact-label">Police</div><div class="contact-number" style="color:var(--danger-red);">100</div></div>
                 </div>
-                <div class="contact-card">
-                    <div class="contact-label">Women-Helpline</div>
-                    <div class="contact-number">1091</div>
+            </div>
+
+            <!-- SafeBot Quick Chat -->
+            <div class="geofence-section" style="margin-top:2rem;">
+                <h2>🤖 SafeBot — AI Safety Assistant</h2>
+                <div id="safebotMessages" class="activity-list" style="margin-bottom:1rem;min-height:120px;">
+                    <div class="activity-item">
+                        <span class="activity-message" style="color:var(--accent-teal);">Hello! I'm SafeBot, your AI safety assistant. I can help with safety advice, emergency info, and local tips. How can I help?</span>
+                    </div>
                 </div>
-                <div class="contact-card">
-                    <div class="contact-label">Medical Emergency</div>
-                    <div class="contact-number">108</div>
+                <div style="display:flex;gap:0.8rem;">
+                    <input type="text" id="safebotInput" placeholder="Ask SafeBot..." class="form-input" style="flex:1;" onkeydown="if(event.key==='Enter') sendSafeBot()">
+                    <button class="action-btn btn-primary" onclick="sendSafeBot()" style="width:auto;padding:0.8rem 1.2rem;">Send</button>
                 </div>
             </div>
         </div>
@@ -200,6 +388,8 @@
     <script src="js/auth.js"></script>
     <script src="js/dashboard.js"></script>
     <script src="js/sos.js"></script>
-
+    <script src="js/incidents.js"></script>
+    <script src="js/accidents.js"></script>
+    <script src="js/help.js"></script>
 </body>
 </html>

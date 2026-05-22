@@ -13,7 +13,7 @@ const generateBlockchainId = (username) => {
 };
 
 const register = async (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, fullName, mobile, role } = req.body;
     try {
         if (await User.findOne({ username }))
             return res.status(400).json({ message: 'Username already taken' });
@@ -21,9 +21,8 @@ const register = async (req, res) => {
         const hashed = await bcrypt.hash(password, 10);
         const blockchainId = generateBlockchainId(username);
         const user = await User.create({
-            username,
-            password: hashed,
-            blockchainId,
+            username, password: hashed, blockchainId,
+            fullName: fullName || '', mobile: mobile || '', role: role || 'Tourist',
             activityLog: [{ type: 'login', message: 'Account created & identity registered on blockchain' }]
         });
 

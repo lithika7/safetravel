@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
+const reportRoutes = require('./routes/reportRoutes');
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(cors({ origin: allowedOrigins }));
 app.use(express.json());
 
 app.use('/api/auth', authRoutes);
+app.use('/api/reports', reportRoutes);
 
 app.get('/', (req, res) => res.json({ message: 'SafeTravel API running' }));
 

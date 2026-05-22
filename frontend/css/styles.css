@@ -1011,6 +1011,117 @@
         .hidden { display: none !important; }
         .text-center { text-align: center; }
 
+        /* ===== FORM SELECT & TEXTAREA ===== */
+        .form-select, .form-textarea, .form-input {
+            width: 100%;
+            padding: 0.9rem 1.2rem;
+            border: 2px solid var(--border-light);
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 0.9rem;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-family: 'Poppins', sans-serif;
+            transition: var(--transition);
+        }
+        .form-select:focus, .form-textarea:focus, .form-input:focus {
+            outline: none;
+            border-color: var(--primary-purple);
+            background: rgba(124, 58, 237, 0.1);
+        }
+        .form-select option { background: var(--dark-secondary); }
+        .form-textarea { resize: vertical; min-height: 80px; }
+
+        /* ===== MODAL ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 500;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            backdrop-filter: blur(4px);
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-card {
+            background: var(--dark-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: 1.5rem;
+            padding: 2rem;
+            width: 100%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .modal-header h3 { font-size: 1.2rem; color: var(--text-primary); }
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-tertiary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.3rem;
+        }
+        .modal-close:hover { color: var(--danger-red); }
+
+        /* ===== REPORT LIST & CARDS ===== */
+        .report-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            padding: 1rem 0 3rem 0;
+        }
+        .report-card {
+            background: rgba(31, 41, 55, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-light);
+            border-radius: 1.2rem;
+            padding: 1.5rem;
+            transition: var(--transition);
+        }
+        .report-card:hover {
+            border-color: rgba(124, 58, 237, 0.4);
+            background: rgba(31, 41, 55, 0.6);
+        }
+
+        /* ===== INJURY BUTTONS ===== */
+        .injury-btn {
+            flex: 1;
+            padding: 0.7rem;
+            border: 2px solid var(--border-light);
+            background: rgba(255,255,255,0.05);
+            color: var(--text-secondary);
+            border-radius: 0.8rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            font-family: 'Poppins', sans-serif;
+        }
+        .injury-btn.btn-active {
+            background: var(--primary-teal);
+            border-color: var(--primary-teal);
+            color: white;
+        }
+
+        /* ===== PROFILE ROWS ===== */
+        .profile-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .profile-label { color: var(--text-tertiary); font-size: 0.85rem; }
+        .profile-value { color: var(--text-primary); font-size: 0.9rem; font-weight: 500; }
+
         /* ===== BLOCKCHAIN ID ===== */
         .blockchain-id-box {
             background: rgba(20, 184, 166, 0.08);

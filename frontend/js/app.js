@@ -30,6 +30,9 @@ function goToPage(pageId) {
     document.getElementById(pageId).classList.add('active');
     updateNav(pageId);
     if (pageId === 'dashboard') initDashboard();
+    if (pageId === 'incidents') loadIncidents();
+    if (pageId === 'accidents') loadAccidents();
+    if (pageId === 'help') initHelp();
 }
 
 function logout() {
