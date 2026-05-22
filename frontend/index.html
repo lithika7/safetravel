@@ -11,10 +11,15 @@
     <!-- NAVIGATION -->
     <nav>
         <div class="logo">🛡️ SafeTravel</div>
-        <ul class="nav-links">
+        <!-- Guest nav: shown on landing & auth -->
+        <ul class="nav-links" id="authNav">
             <li><a href="#" onclick="goToPage('landing'); return false;">Home</a></li>
-            <li><a href="#" onclick="goToPage('dashboard'); return false;">Dashboard</a></li>
-            <li><a href="#" onclick="goToPage('sos'); return false;">SOS</a></li>
+            <li><a href="#" onclick="goToPage('auth'); return false;">Login</a></li>
+        </ul>
+        <!-- App nav: shown when logged in -->
+        <ul class="nav-links" id="appNav" style="display:none;">
+            <li><a href="#" data-page="dashboard" onclick="goToPage('dashboard'); return false;">Dashboard</a></li>
+            <li><a href="#" data-page="sos" onclick="goToPage('sos'); return false;">SOS</a></li>
             <li><button onclick="logout()">Logout</button></li>
         </ul>
     </nav>
@@ -174,15 +179,6 @@
     <script src="js/auth.js"></script>
     <script src="js/dashboard.js"></script>
     <script src="js/sos.js"></script>
-    <script>
-        window.addEventListener('DOMContentLoaded', () => {
-            const saved = localStorage.getItem('currentUser');
-            if (saved && localStorage.getItem('isLoggedIn') === 'true') {
-                isLoggedIn = true;
-                currentUser = saved;
-                document.getElementById('usernameDisplay').textContent = saved;
-            }
-        });
-    </script>
+
 </body>
 </html>

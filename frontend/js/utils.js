@@ -10,3 +10,17 @@ function showToast(message, type = 'info', duration = 4000) {
         setTimeout(() => toast.remove(), 400);
     }, duration);
 }
+
+async function apiFetch(endpoint, options = {}) {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`${API_BASE}${endpoint}`, {
+        headers: {
+            'Content-Type': 'application/json',
+            ...(token && { Authorization: `Bearer ${token}` })
+        },
+        ...options
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Something went wrong');
+    return data;
+}

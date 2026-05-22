@@ -134,6 +134,15 @@
             background: rgba(124, 58, 237, 0.15);
         }
 
+        .nav-links a.active-link {
+            color: var(--text-primary);
+            background: rgba(124, 58, 237, 0.2);
+        }
+
+        .nav-links a.active-link::after {
+            width: calc(100% - 2.4rem);
+        }
+
         /* ===== COMMON CONTAINERS ===== */
         .container {
             max-width: 1300px;
