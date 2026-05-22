@@ -126,15 +126,15 @@
             <!-- GEOFENCING SECTION -->
             <div class="geofence-section">
                 <h2>🗺️ Geofence Monitoring</h2>
-                <div class="geofence-map">
-                    <div class="map-element user-location" id="userMarker" style="left: 100px; top: 100px;"></div>
-                    <div class="map-element danger-zone" id="dangerZone" style="left: 50%; top: 50%; transform: translate(-50%, -50%);"></div>
+                <div class="geofence-map" id="geofenceMap">
+                    <div class="map-element user-location" id="userMarker"></div>
+                    <div class="map-element danger-zone" id="dangerZone"></div>
                 </div>
                 <div class="geofence-warning" id="geofenceWarning">
-                    <p>⚠️ Warning: You are entering a danger zone! Stay alert and proceed with caution.</p>
+                    <p>⚠️ Warning: You are near a danger zone! Stay alert and proceed with caution.</p>
                 </div>
                 <p style="margin-top: 1.5rem; color: var(--text-tertiary); text-align: center; font-size: 0.9rem;">
-                    🟢 Green pulse = Your current location | 🔴 Red zone = Simulated danger area
+                    🟢 Green pulse = Your current location &nbsp;|&nbsp; 🔴 Red zone = Simulated danger area &nbsp;|&nbsp; 📏 <span id="geofenceDistance">Calculating...</span>
                 </p>
             </div>
         </div>
