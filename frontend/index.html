@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeTravel - Smart Tourist Safety Monitoring</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- NAVIGATION -->
+    <nav>
+        <div class="logo">🛡️ SafeTravel</div>
+        <ul class="nav-links">
+            <li><a href="#" onclick="goToPage('landing'); return false;">Home</a></li>
+            <li><a href="#" onclick="goToPage('dashboard'); return false;">Dashboard</a></li>
+            <li><a href="#" onclick="goToPage('sos'); return false;">SOS</a></li>
+            <li><button onclick="logout()">Logout</button></li>
+        </ul>
+    </nav>
+
+    <!-- TOAST CONTAINER -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- LANDING PAGE -->
+    <div id="landing" class="page active">
+        <div class="landing-hero">
+            <div class="hero-content">
+                <h1>Smart Tourist Safety Monitoring</h1>
+                <p>Real-time location tracking, AI-powered risk detection, and emergency response system</p>
+                <button class="cta-button" onclick="goToPage('auth'); return false;">Get Started</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AUTH PAGE -->
+    <div id="auth" class="page">
+        <div class="auth-container">
+            <div class="auth-card">
+                <h2 id="authTitle">Login</h2>
+                <form id="authForm" onsubmit="handleAuth(event)">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" placeholder="Enter username" required>
+                        <div class="error-message"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" placeholder="Enter password" required>
+                        <div class="error-message"></div>
+                    </div>
+                    <div id="confirmPasswordGroup" class="form-group hidden">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input type="password" id="confirmPassword" placeholder="Confirm password">
+                        <div class="error-message"></div>
+                    </div>
+                    <button id="authBtn" type="submit" class="auth-button">Login</button>
+                </form>
+                <div class="auth-toggle">
+                    <span id="toggleText">Don't have an account? </span>
+                    <button onclick="toggleAuthMode()">Sign Up</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD PAGE -->
+    <div id="dashboard" class="page">
+        <div class="container">
+            <div class="dashboard-header">
+                <h1>Welcome, <span id="usernameDisplay"></span>! 👋</h1>
+                <p>Real-time safety monitoring and threat assessment</p>
+            </div>
+
+            <div class="dashboard-grid">
+                <!-- Location Card -->
+                <div class="dashboard-card">
+                    <h3><span class="card-icon">📍</span> Your Location</h3>
+                    <div class="location-display">
+                        <p style="margin-bottom: 1rem; color: var(--text-secondary);">Fetching location...</p>
+                        <div class="loading-spinner"></div>
+                    </div>
+                    <div id="locationInfo" style="display: none; color: var(--text-secondary);">
+                        <p>📌 Latitude: <span id="latitude" style="color: var(--primary-teal);">-</span></p>
+                        <p>📌 Longitude: <span id="longitude" style="color: var(--primary-teal);">-</span></p>
+                        <p>🎯 Accuracy: <span id="accuracy" style="color: var(--primary-teal);">-</span>m</p>
+                    </div>
+                </div>
+
+                <!-- Safety Status Card -->
+                <div class="dashboard-card">
+                    <h3><span class="card-icon">🛡️</span> Safety Status</h3>
+                    <div class="status-badge">
+                        <div class="status-dot safe" id="statusDot"></div>
+                        <div>
+                            <p class="status-text safe" id="statusText">Safe</p>
+                            <p class="status-subtext" id="statusSubtext">All clear in your area</p>
+                        </div>
+                    </div>
+                    <div class="risk-meter">
+                        <div class="risk-label">
+                            <span>AI Risk Detection:</span>
+                            <span class="risk-value low" id="riskScore">Low</span>
+                        </div>
+                        <div class="risk-bar">
+                            <div class="risk-fill" id="riskFill"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions Card -->
+                <div class="dashboard-card">
+                    <h3><span class="card-icon">⚡</span> Quick Actions</h3>
+                    <div class="action-buttons">
+                        <button class="action-btn btn-primary" onclick="goToPage('sos'); return false;">🚨 Emergency SOS</button>
+                        <button class="action-btn btn-secondary" onclick="refreshDashboard()">🔄 Refresh Status</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GEOFENCING SECTION -->
+            <div class="geofence-section">
+                <h2>🗺️ Geofence Monitoring</h2>
+                <div class="geofence-map">
+                    <div class="map-element user-location" id="userMarker" style="left: 100px; top: 100px;"></div>
+                    <div class="map-element danger-zone" id="dangerZone" style="left: 50%; top: 50%; transform: translate(-50%, -50%);"></div>
+                </div>
+                <div class="geofence-warning" id="geofenceWarning">
+                    <p>⚠️ Warning: You are entering a danger zone! Stay alert and proceed with caution.</p>
+                </div>
+                <p style="margin-top: 1.5rem; color: var(--text-tertiary); text-align: center; font-size: 0.9rem;">
+                    🟢 Green pulse = Your current location | 🔴 Red zone = Simulated danger area
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SOS PAGE -->
+    <div id="sos" class="page">
+        <div class="sos-container">
+            <div class="sos-header">
+                <h1>🚨 Emergency Response System</h1>
+            </div>
+
+            <button class="sos-button" id="sosButton" onclick="activateSOS()">SOS</button>
+            <div class="sos-message">Press the button in case of emergency</div>
+
+            <div class="sos-alert" id="sosAlert">
+                <h3>🚨 Emergency Alert Sent!</h3>
+                <p>Your location has been transmitted to emergency services.</p>
+                <p style="font-size: 0.9rem; margin-top: 1rem;">Emergency personnel will reach you shortly. Stay calm and safe.</p>
+            </div>
+
+            <div class="emergency-contacts">
+                <div class="contact-card">
+                    <div class="contact-label">Police Emergency</div>
+                    <div class="contact-number">100</div>
+                </div>
+                <div class="contact-card">
+                    <div class="contact-label">Women-Helpline</div>
+                    <div class="contact-number">1091</div>
+                </div>
+                <div class="contact-card">
+                    <div class="contact-label">Medical Emergency</div>
+                    <div class="contact-number">108</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/sos.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('currentUser');
+            if (saved && localStorage.getItem('isLoggedIn') === 'true') {
+                isLoggedIn = true;
+                currentUser = saved;
+                document.getElementById('usernameDisplay').textContent = saved;
+            }
+        });
+    </script>
+</body>
+</html>
