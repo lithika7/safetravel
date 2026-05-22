@@ -1,14 +1,42 @@
-function activateSOS() {
-            const btn = document.getElementById('sosButton');
-            const alert = document.getElementById('sosAlert');
+async function activateSOS() {
+    const btn = document.getElementById('sosButton');
+    const alertBox = document.getElementById('sosAlert');
 
-            btn.classList.add('activated');
-            alert.classList.add('show');
+    btn.disabled = true;
+    btn.classList.add('activated');
 
-            showToast('🚨 SOS ACTIVATED - Emergency services notified!', 'danger');
+    // Try to get real location, fall back to null
+    let latitude = null, longitude = null;
+    try {
+        const pos = await new Promise((resolve, reject) =>
+            navigator.geolocation.getCurrentPosition(resolve, reject, { timeout: 5000 })
+        );
+        latitude = pos.coords.latitude;
+        longitude = pos.coords.longitude;
+    } catch {
+        // location unavailable, still send SOS without coords
+    }
 
-            setTimeout(() => {
-                alert.classList.remove('show');
-                btn.classList.remove('activated');
-            }, 5000);
-        }
+    try {
+        await apiFetch('/auth/sos', {
+            method: 'POST',
+            body: JSON.stringify({ latitude, longitude })
+        });
+
+        alertBox.classList.add('show');
+        showToast('🚨 SOS ACTIVATED - Emergency services notified!', 'danger');
+
+        setTimeout(() => {
+            alertBox.classList.remove('show');
+            btn.classList.remove('activated');
+            btn.disabled = false;
+        }, 5000);
+
+    } catch (err) {
+        showToast(err.message === 'No token, unauthorized'
+            ? 'Please log in to use SOS'
+            : '🚨 SOS sent (offline mode)', 'danger');
+        btn.classList.remove('activated');
+        btn.disabled = false;
+    }
+}
