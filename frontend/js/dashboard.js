@@ -37,11 +37,11 @@ function getLocation() {
         pos => {
             userLat = pos.coords.latitude;
             userLon = pos.coords.longitude;
-            const acc = Math.round(pos.coords.accuracy);
+            const acc = Math.abs(Math.round(pos.coords.accuracy));
 
             document.getElementById('latitude').textContent = userLat.toFixed(4);
             document.getElementById('longitude').textContent = userLon.toFixed(4);
-            document.getElementById('accuracy').textContent = acc > 100 ? `~${acc}` : acc;
+            document.getElementById('accuracy').textContent = acc >= 100 ? `~${acc}` : acc;
             document.querySelector('.location-display').innerHTML = '';
             document.getElementById('locationInfo').style.display = 'block';
 
