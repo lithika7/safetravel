@@ -96,7 +96,16 @@ const logActivity = async (req, res) => {
 
 const getProfile = async (req, res) => {
     try {
-        const user = await User.findById(req.user.id).select('-password');
+        let user = await User.findById(req.user.id).select('-password');
+        // Auto-generate blockchainId for old accounts that don't have one
+        if (!user.blockchainId) {
+            const blockchainId = generateBlockchainId(user.username);
+            user = await User.findByIdAndUpdate(
+                req.user.id,
+                { blockchainId },
+                { new: true }
+            ).select('-password');
+        }
         res.json(user);
     } catch (err) {
         res.status(500).json({ message: 'Server error' });

@@ -10,10 +10,19 @@ function initDashboard() {
 }
 
 // ===== BLOCKCHAIN IDENTITY =====
-function displayBlockchainId() {
-    const id = localStorage.getItem('blockchainId');
+async function displayBlockchainId() {
     const el = document.getElementById('blockchainId');
-    if (el) el.textContent = id || 'Not assigned';
+    if (!el) return;
+    let id = localStorage.getItem('blockchainId');
+    // If missing (old account), fetch from profile
+    if (!id || id === 'undefined' || id === '') {
+        try {
+            const user = await apiFetch('/auth/profile');
+            id = user.blockchainId || null;
+            if (id) localStorage.setItem('blockchainId', id);
+        } catch { id = null; }
+    }
+    el.textContent = id || 'Generating...';
 }
 
 // ===== LOCATION =====
@@ -32,7 +41,7 @@ function getLocation() {
 
             document.getElementById('latitude').textContent = userLat.toFixed(4);
             document.getElementById('longitude').textContent = userLon.toFixed(4);
-            document.getElementById('accuracy').textContent = acc;
+            document.getElementById('accuracy').textContent = acc > 100 ? `~${acc}` : acc;
             document.querySelector('.location-display').innerHTML = '';
             document.getElementById('locationInfo').style.display = 'block';
 
@@ -227,13 +236,15 @@ function addActivityToUI(entry, prepend = true) {
     const list = document.getElementById('activityList');
     if (!list) return;
 
-    const icons = { login: '🔐', sos: '🚨', location_check: '📍', danger_zone: '⚠️', ai_alert: '🤖' };
+    const icons = { login: '[LOGIN]', sos: '[SOS]', location_check: '[LOC]', danger_zone: '[ZONE]', ai_alert: '[AI]' };
+    const colors = { login: 'var(--primary-teal)', sos: 'var(--danger-red)', location_check: 'var(--success-green)', danger_zone: 'var(--warning-orange)', ai_alert: 'var(--accent-purple)' };
     const time = new Date(entry.timestamp).toLocaleTimeString();
 
     const item = document.createElement('div');
     item.className = 'activity-item';
+    const color = colors[entry.type] || 'var(--text-tertiary)';
     item.innerHTML = `
-        <span class="activity-icon">${icons[entry.type] || '📋'}</span>
+        <span class="activity-icon" style="color:${color};font-size:0.75rem;font-weight:700;background:rgba(255,255,255,0.06);padding:0.3rem 0.5rem;border-radius:0.4rem;font-family:monospace;">${icons[entry.type] || '[LOG]'}</span>
         <span class="activity-message">${entry.message}</span>
         <span class="activity-time">${time}</span>
     `;
