@@ -121,6 +121,18 @@
                         <button class="action-btn btn-secondary" onclick="refreshDashboard()">🔄 Refresh Status</button>
                     </div>
                 </div>
+
+                <!-- Blockchain Identity Card -->
+                <div class="dashboard-card">
+                    <h3><span class="card-icon">🔗</span> Blockchain Identity</h3>
+                    <div style="position:relative;z-index:1;">
+                        <p style="color:var(--text-tertiary);font-size:0.85rem;margin-bottom:0.8rem;">Your tamper-proof digital ID</p>
+                        <div class="blockchain-id-box">
+                            <span id="blockchainId" style="word-break:break-all;font-size:0.78rem;font-family:monospace;color:var(--accent-teal);">Loading...</span>
+                        </div>
+                        <p style="color:var(--text-tertiary);font-size:0.75rem;margin-top:0.8rem;">🔒 Identity secured via SHA-256 hash chain</p>
+                    </div>
+                </div>
             </div>
 
             <!-- GEOFENCING SECTION -->
@@ -137,6 +149,15 @@
                     🟢 Green pulse = Your current location &nbsp;|&nbsp; 🔴 Red zone = Simulated danger area &nbsp;|&nbsp; 📏 <span id="geofenceDistance">Calculating...</span>
                 </p>
             </div>
+
+            <!-- ACTIVITY LOG SECTION -->
+            <div class="geofence-section" style="margin-top: 2rem;">
+                <h2>📋 Tourist Activity Log</h2>
+                <div id="activityList" class="activity-list">
+                    <p style="color:var(--text-tertiary);text-align:center;padding:2rem;">Loading activity...</p>
+                </div>
+            </div>
+
         </div>
     </div>
 

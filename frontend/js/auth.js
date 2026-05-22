@@ -66,6 +66,7 @@ async function handleAuth(event) {
 
         localStorage.setItem('token', data.token);
         localStorage.setItem('currentUser', data.username);
+        localStorage.setItem('blockchainId', data.blockchainId || '');
         currentUser = data.username;
 
         showToast(`Welcome, ${data.username}!`, 'success');

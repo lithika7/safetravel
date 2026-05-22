@@ -13,11 +13,24 @@ const userSchema = new mongoose.Schema({
         required: true,
         minlength: 4
     },
+    blockchainId: {
+        type: String,
+        unique: true
+    },
     sosAlerts: [
         {
             triggeredAt: { type: Date, default: Date.now },
             latitude: Number,
             longitude: Number
+        }
+    ],
+    activityLog: [
+        {
+            type: { type: String },  // 'login', 'sos', 'location_check', 'danger_zone'
+            message: String,
+            latitude: Number,
+            longitude: Number,
+            timestamp: { type: Date, default: Date.now }
         }
     ]
 }, { timestamps: true });

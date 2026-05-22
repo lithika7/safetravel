@@ -1,20 +1,28 @@
-// Simulated danger zone — offset ~500m from user's real location
 let userLat = null, userLon = null;
 let dangerZoneLat = null, dangerZoneLon = null;
+let lastMovementLat = null, lastMovementLon = null;
+let noMovementTimer = null;
 
 function initDashboard() {
+    displayBlockchainId();
     getLocation();
+    loadActivityLog();
 }
 
+// ===== BLOCKCHAIN IDENTITY =====
+function displayBlockchainId() {
+    const id = localStorage.getItem('blockchainId');
+    const el = document.getElementById('blockchainId');
+    if (el) el.textContent = id || 'Not assigned';
+}
+
+// ===== LOCATION =====
 function getLocation() {
     document.querySelector('.location-display').innerHTML =
         '<p style="color:var(--text-secondary);">Fetching location...</p><div class="loading-spinner"></div>';
     document.getElementById('locationInfo').style.display = 'none';
 
-    if (!navigator.geolocation) {
-        useSimulatedLocation();
-        return;
-    }
+    if (!navigator.geolocation) { useSimulatedLocation(); return; }
 
     navigator.geolocation.getCurrentPosition(
         pos => {
@@ -28,12 +36,13 @@ function getLocation() {
             document.querySelector('.location-display').innerHTML = '';
             document.getElementById('locationInfo').style.display = 'block';
 
-            // Place danger zone ~500m north-east of user
             dangerZoneLat = userLat + 0.0045;
             dangerZoneLon = userLon + 0.0045;
 
             updateMapMarkers();
             assessRisk();
+            startMovementWatch();
+            logActivity('location_check', '📍 Location updated', userLat, userLon);
             showToast('📍 Location updated', 'success');
         },
         () => useSimulatedLocation(),
@@ -42,8 +51,7 @@ function getLocation() {
 }
 
 function useSimulatedLocation() {
-    userLat = 11.3595;
-    userLon = 77.8284;
+    userLat = 11.3595; userLon = 77.8284;
     dangerZoneLat = userLat + 0.0045;
     dangerZoneLon = userLon + 0.0045;
 
@@ -58,7 +66,33 @@ function useSimulatedLocation() {
     assessRisk();
 }
 
-// Convert lat/lon to pixel position inside the map box
+// ===== AI BEHAVIOR: NO-MOVEMENT DETECTION =====
+function startMovementWatch() {
+    lastMovementLat = userLat;
+    lastMovementLon = userLon;
+
+    if (noMovementTimer) clearInterval(noMovementTimer);
+
+    noMovementTimer = setInterval(() => {
+        navigator.geolocation.getCurrentPosition(pos => {
+            const newLat = pos.coords.latitude;
+            const newLon = pos.coords.longitude;
+            const moved = getDistanceMeters(lastMovementLat, lastMovementLon, newLat, newLon);
+
+            if (moved < 10) {
+                // Less than 10m movement in 2 minutes — possible distress
+                showToast('🤖 AI Alert: No movement detected for 2 mins!', 'warning');
+                logActivity('ai_alert', '🤖 AI: No movement detected — possible distress', newLat, newLon);
+                addActivityToUI({ type: 'ai_alert', message: '🤖 AI: No movement detected — possible distress', timestamp: new Date() });
+            } else {
+                lastMovementLat = newLat;
+                lastMovementLon = newLon;
+            }
+        });
+    }, 2 * 60 * 1000); // every 2 minutes
+}
+
+// ===== MAP =====
 function latLonToPixel(lat, lon, mapW, mapH) {
     const x = ((lon - (userLon - 0.01)) / 0.02) * mapW;
     const y = mapH - ((lat - (userLat - 0.01)) / 0.02) * mapH;
@@ -86,7 +120,7 @@ function updateMapMarkers() {
     dangerZone.style.transform = 'translate(-50%, -50%)';
 }
 
-// Haversine formula — real distance in meters between two coords
+// ===== HAVERSINE =====
 function getDistanceMeters(lat1, lon1, lat2, lon2) {
     const R = 6371000;
     const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -97,6 +131,7 @@ function getDistanceMeters(lat1, lon1, lat2, lon2) {
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+// ===== RISK ASSESSMENT =====
 function assessRisk() {
     if (userLat === null) return;
 
@@ -104,9 +139,10 @@ function assessRisk() {
     const dist = getDistanceMeters(userLat, userLon, dangerZoneLat, dangerZoneLon);
 
     let risk = 10;
-    if (hour >= 22 || hour < 6) risk += 30;   // night time
-    if (dist < 800) risk += 40;                // close to danger zone
-    else if (dist < 1500) risk += 20;          // moderate proximity
+    if (hour >= 22 || hour < 6) risk += 30;
+    if (dist < 500) risk += 50;
+    else if (dist < 800) risk += 35;
+    else if (dist < 1500) risk += 15;
 
     risk = Math.min(risk, 100);
 
@@ -136,6 +172,8 @@ function checkGeofence(dist) {
         warning.classList.add('active');
         updateStatus('danger');
         showToast('⚠️ You are inside a danger zone!', 'danger');
+        logActivity('danger_zone', '🚨 Entered danger zone', userLat, userLon);
+        addActivityToUI({ type: 'danger_zone', message: '🚨 Entered danger zone', timestamp: new Date() });
     } else if (dist < 800) {
         warning.classList.add('active');
         showToast('⚠️ Danger zone nearby, stay alert!', 'warning');
@@ -162,7 +200,53 @@ function updateStatus(status) {
     }
 }
 
+// ===== ACTIVITY LOG =====
+async function logActivity(type, message, latitude = null, longitude = null) {
+    try {
+        await apiFetch('/auth/activity', {
+            method: 'POST',
+            body: JSON.stringify({ type, message, latitude, longitude })
+        });
+    } catch { /* silent fail — don't interrupt UX */ }
+}
+
+async function loadActivityLog() {
+    try {
+        const user = await apiFetch('/auth/profile');
+        const log = user.activityLog || [];
+        const list = document.getElementById('activityList');
+        if (!list) return;
+
+        list.innerHTML = '';
+        // Show latest 8 entries
+        [...log].reverse().slice(0, 8).forEach(entry => addActivityToUI(entry, false));
+    } catch { /* silent */ }
+}
+
+function addActivityToUI(entry, prepend = true) {
+    const list = document.getElementById('activityList');
+    if (!list) return;
+
+    const icons = { login: '🔐', sos: '🚨', location_check: '📍', danger_zone: '⚠️', ai_alert: '🤖' };
+    const time = new Date(entry.timestamp).toLocaleTimeString();
+
+    const item = document.createElement('div');
+    item.className = 'activity-item';
+    item.innerHTML = `
+        <span class="activity-icon">${icons[entry.type] || '📋'}</span>
+        <span class="activity-message">${entry.message}</span>
+        <span class="activity-time">${time}</span>
+    `;
+
+    if (prepend && list.firstChild) {
+        list.insertBefore(item, list.firstChild);
+    } else {
+        list.appendChild(item);
+    }
+}
+
 function refreshDashboard() {
     getLocation();
+    loadActivityLog();
     showToast('🔄 Dashboard refreshed', 'success');
 }
